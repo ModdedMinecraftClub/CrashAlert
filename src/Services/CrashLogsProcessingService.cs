@@ -6,12 +6,12 @@ namespace Mmcc.CrashAlert.Services;
 public class CrashLogsProcessingService
 {
     private readonly CommandContext _commandContext;
-    private readonly CrashAlertContext _dbContext;
+    private readonly ProcessedCrashLogsService _processedCrashLogsService;
 
-    public CrashLogsProcessingService(CommandContext commandContext, CrashAlertContext dbContext)
+    public CrashLogsProcessingService(CommandContext commandContext, ProcessedCrashLogsService processedCrashLogsService)
     {
         _commandContext = commandContext;
-        _dbContext = dbContext;
+        _processedCrashLogsService = processedCrashLogsService;
     }
 
     private string GetFullCrashLogPath(string logFileName) => Path.Join(_commandContext.CrashLogsDir, logFileName);
@@ -27,11 +27,10 @@ public class CrashLogsProcessingService
         }
 
         Console.WriteLine($"Found a recent crash log - {last}");
-        Console.WriteLine($"Using database: {_dbContext.DbPath}");
-        
-        // check if already processed;
-        var alreadyProcessed = await _dbContext.ProcessedCrashLogs.AnyAsync(pc => pc.FilePath.Equals(last));
 
+        // check if already processed;
+        var alreadyProcessed = await _processedCrashLogsService.IsProcessedAlready(last);
+        
         if (alreadyProcessed)
         {
             Console.WriteLine("Already processed. Exiting...");

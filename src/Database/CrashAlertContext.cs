@@ -16,7 +16,11 @@ public class CrashAlertContext : DbContext
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite($"Data Source={DbPath}");
+    {
+        Console.WriteLine($"Using database: {DbPath}");
+        
+        options.UseSqlite($"Data Source={DbPath}");
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.Entity<ProcessedCrashLog>().HasKey(c => c.FilePath);

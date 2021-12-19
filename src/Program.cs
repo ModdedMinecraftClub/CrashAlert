@@ -10,6 +10,7 @@ var services = new ServiceCollection();
 services.AddDbContext<CrashAlertContext>();
 
 services.AddScoped<CommandContext>();
+services.AddScoped<ProcessedCrashLogsService>();
 services.AddScoped<CrashLogsProcessingService>();
 
 // commands;
