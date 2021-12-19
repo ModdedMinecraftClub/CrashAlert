@@ -1,20 +1,21 @@
-using Microsoft.EntityFrameworkCore;
-using Mmcc.CrashAlert.Database;
-
 namespace Mmcc.CrashAlert.Services;
 
 public class CrashLogsProcessingService
 {
     private readonly CommandContext _commandContext;
     private readonly ProcessedCrashLogsService _processedCrashLogsService;
+    private readonly CrashNotificationService _notificationService;
 
-    public CrashLogsProcessingService(CommandContext commandContext, ProcessedCrashLogsService processedCrashLogsService)
+    public CrashLogsProcessingService(
+        CommandContext commandContext,
+        ProcessedCrashLogsService processedCrashLogsService,
+        CrashNotificationService notificationService
+    )
     {
         _commandContext = commandContext;
         _processedCrashLogsService = processedCrashLogsService;
+        _notificationService = notificationService;
     }
-
-    private string GetFullCrashLogPath(string logFileName) => Path.Join(_commandContext.CrashLogsDir, logFileName);
 
     public async Task ProcessCrashLogs()
     {
@@ -36,8 +37,11 @@ public class CrashLogsProcessingService
             Console.WriteLine("Already processed. Exiting...");
             return;
         }
+
+        await _notificationService.Notify(last);
+        await _processedCrashLogsService.MarkAsProcessed(last);
         
-        
+        Console.WriteLine("Notified.\n\nDone!");
     }
 
     private IEnumerable<string> GetRecentCrashLogs()
