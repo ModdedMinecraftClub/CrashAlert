@@ -1,7 +1,9 @@
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
+using Mmcc.CrashAlert.Converters;
 using Mmcc.CrashAlert.Services;
+using Remora.Rest.Core;
 
 namespace Mmcc.CrashAlert.Commands;
 
@@ -14,6 +16,12 @@ public class ProcessExitCommand : ICommand
     [CommandParameter(0, Description = "The path to the base server directory (i.e. the one which contains run.sh)")]
     public string BaseServerDirectory { get; init; } = null!;
     
+    [CommandParameter(1, Description = "ID of the Discord Webhook to be used for sending crash notifications.", Converter = typeof(SnowflakeConverter))]
+    public Snowflake WebhookId { get; init; }
+
+    [CommandParameter(2, Description = "Token for the Discord Webhook to be used for sending crash notifications.")]
+    public string WebhookToken { get; init; } = null!;
+    
     [CommandOption("interval", 'i', Description = "Time interval (in minutes) after which a crash is no longer considered recent.")]
     public int Interval { get; init; } = 10;
 
@@ -25,9 +33,17 @@ public class ProcessExitCommand : ICommand
 
     public async ValueTask ExecuteAsync(IConsole console)
     {
+        SetContext();
+
+        await _processingService.ProcessCrashLogs();
+    }
+
+    private void SetContext()
+    {
+        // have to use the Context to have nice DI;
         _commandContext.BaseDir = BaseServerDirectory;
         _commandContext.Interval = Interval;
-        
-        await _processingService.ProcessCrashLogs();
+        _commandContext.DiscordWebhookId = WebhookId;
+        _commandContext.DiscordWebhookToken = WebhookToken;
     }
 }
