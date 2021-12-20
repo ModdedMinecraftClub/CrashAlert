@@ -13,13 +13,13 @@ public class ProcessExitCommand : ICommand
     private readonly CommandContext _commandContext;
     private readonly CrashLogsProcessingService _processingService;
 
-    [CommandParameter(0, Description = "The path to the base server directory (i.e. the one which contains run.sh)")]
+    [CommandParameter(0, Name = "BaseServerDirectory", Description = "The path to the base server directory (i.e. the one which contains run.sh)")]
     public string BaseServerDirectory { get; init; } = null!;
     
-    [CommandParameter(1, Description = "ID of the Discord Webhook to be used for sending crash notifications.", Converter = typeof(SnowflakeConverter))]
+    [CommandParameter(1, Name = "WebhookID", Description = "ID of the Discord Webhook to be used for sending crash notifications.", Converter = typeof(SnowflakeConverter))]
     public Snowflake WebhookId { get; init; }
 
-    [CommandParameter(2, Description = "Token for the Discord Webhook to be used for sending crash notifications.")]
+    [CommandParameter(2, Name = "WebhookToken", Description = "Token for the Discord Webhook to be used for sending crash notifications.")]
     public string WebhookToken { get; init; } = null!;
     
     [CommandOption("interval", 'i', Description = "Time interval (in minutes) after which a crash is no longer considered recent.")]
