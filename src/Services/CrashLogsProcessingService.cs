@@ -19,29 +19,36 @@ public class CrashLogsProcessingService
 
     public async Task ProcessCrashLogs()
     {
-        var last = GetRecentCrashLogs().FirstOrDefault();
+        var recent = GetRecentCrashLogs().ToList();
 
-        if (last is null)
+        if (!recent.Any())
         {
             Console.WriteLine("No recent crash logs found. Exiting...");
             return;
         }
 
-        Console.WriteLine($"Found a recent crash log - {last}");
+        Console.WriteLine($"Found {recent.Count} recent crash log(s)");
 
-        // check if already processed;
-        var alreadyProcessed = await _processedCrashLogsService.IsProcessedAlready(last);
-        
-        if (alreadyProcessed)
+        foreach (var recentLog in recent)
         {
-            Console.WriteLine("Already processed. Exiting...");
-            return;
-        }
-
-        await _notificationService.Notify(last);
-        await _processedCrashLogsService.MarkAsProcessed(last);
+            var alreadyProcessed = await _processedCrashLogsService.IsProcessedAlready(recentLog);
         
-        Console.WriteLine("Notified.\n\nDone!");
+            // skip if already processed;
+            if (alreadyProcessed)
+            {
+                Console.WriteLine($"{recentLog} already processed. Skipping...");
+                continue;
+            }
+            
+            Console.WriteLine($"Notifying about {recentLog}...");
+
+            await _notificationService.Notify(recentLog);
+            await _processedCrashLogsService.MarkAsProcessed(recentLog);
+            
+            Console.WriteLine($"Notified about {recentLog}.");
+        }
+        
+        Console.WriteLine("Done!");
     }
 
     private IEnumerable<string> GetRecentCrashLogs()
