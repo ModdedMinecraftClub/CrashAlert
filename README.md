@@ -1,5 +1,5 @@
 # CrashAlert
-Webhook to alert about server crashes
+Webhook to alert Discord channel about Minecraft server crashes
 
 ![CrashAlert Help](/screenshots/help.png "CrashAlert Help Screen")
 
